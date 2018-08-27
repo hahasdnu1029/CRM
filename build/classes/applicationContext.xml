@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 先配置C3P0的连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3307/crm"/>
+		<property name="user" value="root"/>
+		<property name="password" value="root"/>
+	</bean>
+	<!-- LocalSessionFactoryBean加载配置文件 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 先加载连接池 -->
+		<property name="dataSource" ref="dataSource"/>
+		<!-- 加载方言，加载可选 -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>com/sdnu/domain/User.hbm.xml</value>
+				<value>com/sdnu/domain/Customer.hbm.xml</value>
+				<value>com/sdnu/domain/Dictionary.hbm.xml</value>
+				<value>com/sdnu/domain/Linkman.hbm.xml</value>
+				<value>com/sdnu/domain/Visit.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 先配置平台事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	
+	<!-- 开启事务的注解 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+	<!-- 用户模块配置 -->
+	<bean id="codeAction" class="com.sdnu.web.action.CodeAction" scope="prototype">
+	
+	</bean>
+	<bean id="userAction" class="com.sdnu.web.action.UserAction" scope="prototype">
+		<property name="userService" ref="userService"/>
+	</bean>
+	
+	<bean id="userService" class="com.sdnu.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"/>
+	</bean>
+	
+	<bean id="userDao" class="com.sdnu.dao.impl.UserDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<!-- 客户模块配置 -->
+	<bean id="customerAction" class="com.sdnu.web.action.CustomerAction" scope="prototype">
+		<property name="customerService" ref="customerService"/>
+	</bean>
+	<bean id="customerService" class="com.sdnu.service.impl.CustomerServiceImpl">
+		<property name="customerDao" ref="customerDao"/>
+	</bean>
+	<bean id="customerDao" class="com.sdnu.dao.impl.CustomerDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<!-- 字典模块 -->
+	<bean id="dictAction" class="com.sdnu.web.action.DictAction" scope="prototype">
+		<property name="dictService" ref="dictService"/>
+	</bean>
+	<bean id="dictService" class="com.sdnu.service.impl.DictServiceImpl">
+		<property name="dictDao" ref="dictDao"/>
+	</bean>
+	<bean id="dictDao" class="com.sdnu.dao.impl.DictDaoImpl"> 
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<!-- 联系人模块 -->
+	<bean id="linkmanAction" class="com.sdnu.web.action.LinkmanAction" scope="prototype">
+		<property name="linkmanService" ref="linkmanService"/>
+	</bean>
+	<bean id="linkmanService" class="com.sdnu.service.impl.LinkmanServiceImpl">
+		<property name="linkmanDao" ref="linkmanDao"/>
+	</bean>
+	<bean id="linkmanDao" class="com.sdnu.dao.impl.LinkmanDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<!-- 客户拜访记录 -->
+	<bean id="visitAction" class="com.sdnu.web.action.VisitAction" scope="prototype">
+		<property name="visitService" ref="visitService"/>
+	</bean>
+	<bean id="visitService" class="com.sdnu.service.impl.VisitServiceImpl">
+		<property name="visitDao" ref="visitDao"/>
+	</bean>
+	<bean id="visitDao" class="com.sdnu.dao.impl.VisitDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+

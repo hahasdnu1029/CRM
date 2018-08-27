@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- 允许上传文件的大小 -->
+	<constant name="struts.multipart.maxSize" value="1000000"></constant>
+	<!-- 打开静态方法的使用 -->
+	<constant name="struts.ognl.allowStaticMethodAccess" value="true"></constant>
+	<package name="crm" namespace="/" extends="struts-default">
+		<!-- 自定义结果视图 -->
+		<result-types>
+			<result-type name="captcha" class="com.sdnu.web.results.Captcha"></result-type>
+		</result-types>
+		<!-- 配置拦截器 -->
+		<interceptors>
+			<interceptor name="userInterceptor" class="com.sdnu.interceptor.UserInterceptor" />
+		</interceptors>
+		<!-- 配置全局的结果视图 -->
+		<global-results>
+			<result name="login">/login.jsp</result>
+		</global-results>
+		<!-- 验证码读取配置 -->
+		<action name="code" class="codeAction" method="code">
+			<result name="success" type="captcha">
+			</result>
+		</action>
+		<!-- 用户模块配置 -->
+		<action name="user_*" class="userAction" method="{1}">
+			<result name="loginOk" type="redirect">/index.jsp</result>
+			<result name="initChangePwdOk">/changePwd.jsp</result>
+			<result name="changeError">/changePwd.jsp</result>
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="userInterceptor">
+				<param name="excludeMethods">checkCode,login,regist</param>
+			</interceptor-ref>
+		</action>
+		<!-- 客户模块配置 -->
+		<action name="customer_*" class="customerAction" method="{1}">
+			<interceptor-ref name="userInterceptor" />
+			<result name="listOk">/jsp/customer/list.jsp</result>
+			<result name="addOk" type="redirectAction">customer_list</result>
+			<result name="input">/jsp/error.jsp</result>
+			<result name="deleteOk" type="redirectAction">customer_list</result>
+			<result name="initupdateOk">/jsp/customer/edit.jsp</result>
+			<result name="editOk" type="redirectAction">customer_list</result>
+			<result name="initCustomerAddOk">jsp/customer/add.jsp</result>
+			<result name="findSourceOk">/jsp/source.jsp</result>
+			<result name="findIndustryOk">/jsp/industry.jsp</result>
+			<result name="downLoadOk" type="stream">
+				<!-- 指定动作类中的输入流的属性名 -->
+				<param name="inputName">inputStream</param>
+				<!-- 通知浏览器以下载的方式打开 获取文件名是OGNL表达式，就是调用动作类中的getFileName方法 -->
+				<param name="contentDisposition">attachment;filename=${@java.net.URLEncoder@encode(name)}</param>
+				<!-- MIME类型 -->
+				<param name="contentType">application/octet-stream</param>
+			</result>
+			<result name="downLoadError" type="chain">customer_list</result>
+			<!-- 允许上传文件的类型 -->
+			<interceptor-ref name="defaultStack">
+				<param name="fileUpload.allowedExtensions">.jpg,.txt,.doc,.docx,.png,.jpeg,.gif</param>
+			</interceptor-ref>
+		</action>
+		<!-- 字典模块配置 -->
+		<action name="dict" class="dictAction" method="findByCode">
+		</action>
+		<!-- 联系人模块配置 -->
+		<action name="linkman_*" class="linkmanAction" method="{1}">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="userInterceptor" />
+			<result name="listOk">/jsp/linkman/list.jsp</result>
+			<result name="deleteOk" type="redirectAction">linkman_list</result>
+			<result name="input">/jsp/error.jsp</result>
+			<result name="updateOk" type="redirectAction">linkman_list</result>
+			<result name="addOk" type="redirectAction">linkman_list</result>
+			<result name="editInitOk">/jsp/linkman/edit.jsp</result>
+			<result name="initLinkmanAddOk">/jsp/linkman/add.jsp</result>
+		</action>
+		<!-- 客户拜访模块 -->
+		<action name="visit_*" class="visitAction" method="{1}">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="userInterceptor" />
+			<result name="listOk">/jsp/visit/list.jsp</result>
+			<result name="addOk" type="redirectAction">visit_findByPage</result>
+			<result name="initVisitAddOk">/jsp/visit/add.jsp</result>
+		</action>
+	</package>
+</struts>
+
+
+
+
+
+
+
+
+
+
+
+
+
